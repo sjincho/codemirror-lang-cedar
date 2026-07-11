@@ -35,7 +35,6 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "prepare": "npm run build",
     "build": "rollup -c",
     "test": "mocha \"test/**/*.test.js\"",
     "demo:build": "rollup -c rollup.demo.config.mjs"
