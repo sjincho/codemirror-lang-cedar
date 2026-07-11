@@ -6,8 +6,21 @@ The one existing community package (`codemirror-lang-cedar`) is an unmaintained,
 
 ## Install
 
+This package is distributed from GitHub (not the npm registry). Install it as a git
+dependency — npm/pnpm/yarn build it on install via the `prepare` script:
+
 ```sh
-npm install @sjincho/codemirror-lang-cedar
+npm install github:sjincho/codemirror-lang-cedar
+```
+
+Or pin it in a consumer's `package.json`:
+
+```json
+{
+  "dependencies": {
+    "@sjincho/codemirror-lang-cedar": "github:sjincho/codemirror-lang-cedar"
+  }
+}
 ```
 
 Install the optional Cedar peer only when the editor needs local validation or schema-aware completion:
