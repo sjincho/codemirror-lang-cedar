@@ -1,0 +1,64 @@
+# Basic permit and forbid
+
+permit(principal, action, resource);
+forbid(principal, action, resource);
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),";"),Policy(Effect(Forbid),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),";"))
+
+# Annotations and template slots
+
+@id("locked-resource")
+@description("Only the bound principal may access the bound resource")
+permit(
+  principal == ?principal,
+  action == Action::"view",
+  resource == ?resource
+);
+
+==>
+
+PolicySet(Policy(Annotation("@",AnnotationName,"(",String,")"),Annotation("@",AnnotationName,"(",String,")"),Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal,PrincipalConstraintBody("==",PrincipalTarget(PrincipalSlot("?principal")))),",",ActionConstraint(Action,ActionConstraintBody("==",EntityLiteral(Identifier,EntityLiteralContinuation("::",String)))),",",ResourceConstraint(Resource,ResourceConstraintBody("==",ResourceTarget(ResourceSlot("?resource"))))),")"),";"))
+
+# Typed namespaced scope
+
+permit(
+  principal is Acme::Identity::User in Acme::Identity::Group::"employees",
+  action in Acme::Auth::Action::"read",
+  resource is Acme::Documents::Document in Acme::Documents::Folder::"public"
+);
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal,PrincipalConstraintBody(Is,EntityType(Identifier,"::",Identifier,"::",Identifier),PrincipalInConstraint(In,PrincipalTarget(EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String)))))))),",",ActionConstraint(Action,ActionConstraintBody(In,EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String)))))),",",ResourceConstraint(Resource,ResourceConstraintBody(Is,EntityType(Identifier,"::",Identifier,"::",Identifier),ResourceInConstraint(In,ResourceTarget(EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String))))))))),")"),";"))
+
+# Action group with when and unless
+
+permit(
+  principal,
+  action in [Action::"read", Action::"comment", Action::"share"],
+  resource
+)
+when { principal.department == resource.department }
+unless { resource has "suspended" };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action,ActionConstraintBody(In,ActionEntitySet("[",EntityList(EntityLiteral(Identifier,EntityLiteralContinuation("::",String)),",",EntityLiteral(Identifier,EntityLiteralContinuation("::",String)),",",EntityLiteral(Identifier,EntityLiteralContinuation("::",String))),"]"))),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator("=="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Resource)),Access(MemberAccess(".",MemberProperty(Identifier)))))))))))),"}")),Condition(Unless,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Resource)))))),RelationTail(Has,PropertyPath(PropertyName(String))))))),"}")),";"))
+
+# Administrative policy
+
+@id("administrators-manage-documents")
+permit(
+  principal in Company::Group::"administrators",
+  action in [Company::Action::"create", Company::Action::"update", Company::Action::"delete"],
+  resource is Company::Document
+)
+when { context.mfa == true }
+when { principal.account.active }
+unless { resource.classification == "restricted" };
+
+==>
+
+PolicySet(Policy(Annotation("@",AnnotationName,"(",String,")"),Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal,PrincipalConstraintBody(In,PrincipalTarget(EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String)))))),",",ActionConstraint(Action,ActionConstraintBody(In,ActionEntitySet("[",EntityList(EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String))),",",EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String))),",",EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String)))),"]"))),",",ResourceConstraint(Resource,ResourceConstraintBody(Is,EntityType(Identifier,"::",Identifier)))),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Context)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator("=="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Boolean(True)))))))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))),Access(MemberAccess(".",MemberProperty(Identifier))))))))))),"}")),Condition(Unless,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Resource)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator("=="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),"}")),";"))

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Cedar language support for CodeMirror</title>
+    <style>
+      :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #182126; background: #eef3f0; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top left, #dcece4 0, transparent 32rem), #eef3f0; }
+      main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0 44px; }
+      header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 380px); gap: 40px; align-items: end; margin-bottom: 28px; }
+      .eyebrow { margin: 0 0 12px; color: #176b50; font-size: .78rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+      h1 { max-width: 760px; margin: 0; font-size: clamp(2.3rem, 6vw, 4.8rem); line-height: .98; letter-spacing: -.055em; }
+      .intro { margin: 0; color: #52615b; font-size: 1.05rem; line-height: 1.65; }
+      .workspace { overflow: hidden; border: 1px solid #cbd8d1; border-radius: 16px; background: white; box-shadow: 0 24px 70px rgba(35, 65, 52, .14); }
+      .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 13px 18px; border-bottom: 1px solid #dce3df; background: #f8faf9; }
+      .file { display: flex; align-items: center; gap: 9px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; font-weight: 650; }
+      .file::before { width: 9px; height: 9px; border-radius: 50%; background: #1b8c67; content: ""; box-shadow: 0 0 0 4px #dceee7; }
+      .hint { color: #697771; font-size: .82rem; }
+      #editor { height: min(56vh, 560px); min-height: 390px; }
+      .legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 20px; overflow: hidden; border: 1px solid #cbd8d1; border-radius: 14px; background: #cbd8d1; }
+      .legend article { padding: 20px; background: rgba(255, 255, 255, .78); }
+      .legend strong { display: block; margin-bottom: 7px; font-size: .92rem; }
+      .legend p { margin: 0; color: #5b6963; font-size: .86rem; line-height: 1.5; }
+      code { padding: .14rem .35rem; border-radius: 4px; background: #dfeae5; color: #155b46; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      footer { margin-top: 22px; color: #738079; font-size: .78rem; text-align: right; }
+      @media (max-width: 760px) { main { width: min(100% - 20px, 1180px); padding-top: 32px; } header { grid-template-columns: 1fr; gap: 20px; } .legend { grid-template-columns: 1fr; } .toolbar { align-items: flex-start; flex-direction: column; } #editor { min-height: 460px; } }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "@cedar-policy/cedar-wasm/web": "../node_modules/@cedar-policy/cedar-wasm/web/cedar_wasm.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div><p class="eyebrow">CodeMirror 6 language package</p><h1>Write Cedar policies with confidence.</h1></div>
+        <p class="intro">A browser demo of Cedar syntax highlighting, schema-aware validation, and context-sensitive completion.</p>
+      </header>
+      <section class="workspace" aria-label="Cedar policy editor">
+        <div class="toolbar"><span class="file">datasource-access.cedar</span><span class="hint">Try removing a semicolon, then press <code>Ctrl-Space</code> inside the policy.</span></div>
+        <div id="editor"></div>
+      </section>
+      <section class="legend" aria-label="Demo features">
+        <article><strong>Native highlighting</strong><p>A Lezer grammar highlights Cedar without loading WebAssembly.</p></article>
+        <article><strong>Schema-aware linting</strong><p>The Cedar validator reports parse and validation diagnostics after a short debounce.</p></article>
+        <article><strong>Guided completion</strong><p>Complete Cedar keywords and schema names such as roles, actions, resources, and attributes.</p></article>
+      </section>
+      <footer>Serve this repository over HTTP; the demo intentionally does not support <code>file://</code>.</footer>
+    </main>
+    <script type="module" src="../dist/demo.js"></script>
+  </body>
+</html>

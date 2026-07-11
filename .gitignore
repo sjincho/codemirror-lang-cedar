@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+npm-debug.log*
+# Lezer parser generated from src/*.grammar at build time
+/src/*.grammar.js
+/src/*.grammar.d.ts

@@ -1,0 +1,89 @@
+# Logical and arithmetic precedence
+
+permit(principal, action, resource) when { 1 + 2 * 3 == 7 && !false || true };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))),AddOperator("+"),MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer)))),MultiplyOperator("*"),UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer)))))),RelationTail(CompareOperator("=="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer)))))))),AndOperator("&&"),RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(UnaryOperator("!"),MemberExpression(PrimaryExpression(Literal(Boolean(False))))))))),OrOperator("||"),AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Boolean(True))))))))))),"}")),";"))
+
+# Nested conditional expressions
+
+permit(principal, action, resource) when { if principal.active then if context.preview then true else false else resource.public };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(IfExpression(If,Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))))))),Then,Expr(IfExpression(If,Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Context)),Access(MemberAccess(".",MemberProperty(Identifier))))))))))),Then,Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Boolean(True))))))))))),Else,Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Boolean(False))))))))))))),Else,Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Resource)),Access(MemberAccess(".",MemberProperty(Identifier))))))))))))),"}")),";"))
+
+# Comparison relations
+
+permit(principal, action, resource)
+when { principal.score == 10 }
+when { principal.score != 11 }
+when { principal.score < 12 }
+when { principal.score <= 13 }
+when { principal.score > 1 }
+when { principal.score >= 2 };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator("=="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator("!="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator("<"),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator("<="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator(">"),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(CompareOperator(">="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))))))))),"}")),";"))
+
+# Cedar relation forms
+
+permit(principal, action, resource)
+when { principal in Team::"engineering" }
+when { principal.name like "dev\*" }
+when { principal has "manager" }
+when { principal is Company::User in Company::Group::"staff" };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)))))),RelationTail(CompareOperator(In),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(EntityLiteral(Identifier,EntityLiteralContinuation("::",String)))))))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier))))))),RelationTail(Like,PatternString))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)))))),RelationTail(Has,PropertyPath(PropertyName(String))))))),"}")),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)))))),RelationTail(Is,EntityType(Identifier,"::",Identifier),In,AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String))))))))))))),"}")),";"))
+
+# Postfix member index and method chain
+
+permit(principal, action, resource) when { resource.metadata["owners"].contains(principal) && context.network.isInRange(ip("10.0.0.0/8")) };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Resource)),Access(MemberAccess(".",MemberProperty(Identifier))),Access(IndexAccess("[",String,"]")),Access(MemberAccess(".",MemberProperty(Identifier),CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal))))))))))),")")))))))),AndOperator("&&"),RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Context)),Access(MemberAccess(".",MemberProperty(Identifier))),Access(MemberAccess(".",MemberProperty(Identifier),CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ExtensionCall(Identifier,ExtensionCallContinuation(CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),")"))))))))))))),")"))))))))))),"}")),";"))
+
+# Set and record literals
+
+permit(principal, action, resource) when { [{name: "alice", "roles": ["admin", "editor"]}, {name: "bob", "roles": []}].containsAll([resource.owner]) };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(SetExpression("[",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(RecordExpression("{",RecordEntries(RecordEntry(RecordKey(Identifier),":",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),",",RecordEntry(RecordKey(String),":",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(SetExpression("[",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String)))))))))),",",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),"]")))))))))))),"}")))))))))),",",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(RecordExpression("{",RecordEntries(RecordEntry(RecordKey(Identifier),":",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),",",RecordEntry(RecordKey(String),":",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(SetExpression("[","]")))))))))))),"}"))))))))))),"]")),Access(MemberAccess(".",MemberProperty(Identifier),CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(SetExpression("[",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Resource)),Access(MemberAccess(".",MemberProperty(Identifier)))))))))))),"]"))))))))))),")"))))))))))),"}")),";"))
+
+# Unicode escapes and namespaced entities
+
+permit(principal, action, resource) when { Namespace::User::"a\u{1F600}" == resource.owner };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(EntityLiteral(Identifier,EntityLiteralContinuation("::",Identifier,EntityLiteralContinuation("::",String)))))))),RelationTail(CompareOperator("=="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Resource)),Access(MemberAccess(".",MemberProperty(Identifier)))))))))))),"}")),";"))
+
+# Namespaced extension and method calls
+
+permit(principal, action, resource) when { Net::ip("192.0.2.1").isInRange(Net::ip("192.0.2.0/24")) && decimal("1.50").lessThan(decimal("2.00")) };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ExtensionCall(Identifier,ExtensionCallContinuation("::",Identifier,ExtensionCallContinuation(CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),")"))))),Access(MemberAccess(".",MemberProperty(Identifier),CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ExtensionCall(Identifier,ExtensionCallContinuation("::",Identifier,ExtensionCallContinuation(CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),")")))))))))))))),")")))))))),AndOperator("&&"),RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ExtensionCall(Identifier,ExtensionCallContinuation(CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),")")))),Access(MemberAccess(".",MemberProperty(Identifier),CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ExtensionCall(Identifier,ExtensionCallContinuation(CallArguments("(",ExprList(Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(String))))))))))),")"))))))))))))),")"))))))))))),"}")),";"))
+
+# Unary limit and parenthesized expression
+
+permit(principal, action, resource) when { !!!!(principal.enabled && -1 + 2 == 1) };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(UnaryOperator("!"),UnaryOperator("!"),UnaryOperator("!"),UnaryOperator("!"),MemberExpression(PrimaryExpression(ParenthesizedExpression("(",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)),Access(MemberAccess(".",MemberProperty(Identifier)))))))),AndOperator("&&"),RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(UnaryOperator("-"),MemberExpression(PrimaryExpression(Literal(Integer))))),AddOperator("+"),MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer)))))),RelationTail(CompareOperator("=="),AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(Literal(Integer))))))))))),")")))))))))),"}")),";"))
+
+# Hierarchical has attribute path
+
+permit(principal, action, resource) when { principal has contactInfo.email };
+
+==>
+
+PolicySet(Policy(Effect(Permit),PolicyScope("(",Scope(PrincipalConstraint(Principal),",",ActionConstraint(Action),",",ResourceConstraint(Resource)),")"),Condition(When,ConditionBlock("{",Expr(OrExpression(AndExpression(RelationExpression(AddExpression(MultiplyExpression(UnaryExpression(MemberExpression(PrimaryExpression(ReservedVariable(Principal)))))),RelationTail(Has,PropertyPath(PropertyName(Identifier),".",PropertyName(Identifier))))))),"}")),";"))

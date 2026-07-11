@@ -1,0 +1,288 @@
+@top PolicySet { Policy* }
+
+@skip { whitespace | LineComment }
+
+permit { Permit }
+forbid { Forbid }
+principal { Principal }
+action { Action }
+resource { Resource }
+context { Context }
+when { When }
+unless { Unless }
+if { If }
+then { Then }
+else { Else }
+in { In }
+like { Like }
+has { Has }
+is { Is }
+true { True }
+false { False }
+
+Permit { @extend<Identifier, "permit"> }
+Forbid { @extend<Identifier, "forbid"> }
+Principal { @extend<Identifier, "principal"> }
+Action { @extend<Identifier, "action"> }
+Resource { @extend<Identifier, "resource"> }
+Context { @extend<Identifier, "context"> }
+When { @extend<Identifier, "when"> }
+Unless { @extend<Identifier, "unless"> }
+If { @specialize<Identifier, "if"> }
+Then { @specialize<Identifier, "then"> }
+Else { @specialize<Identifier, "else"> }
+In { @specialize<Identifier, "in"> }
+Like { @specialize<Identifier, "like"> }
+Has { @specialize<Identifier, "has"> }
+Is { @specialize<Identifier, "is"> }
+True { @specialize<Identifier, "true"> }
+False { @specialize<Identifier, "false"> }
+
+@precedence {
+  ifExpression @right,
+  orExpression @left,
+  andExpression @left,
+  relationExpression,
+  addExpression @left,
+  multiplyExpression @left,
+  unaryExpression @right,
+  postfixExpression @left
+}
+
+Policy {
+  Annotation* Effect PolicyScope Condition* ";"
+}
+
+PolicyScope { "(" Scope ")" }
+
+Annotation {
+  "@" AnnotationName ("(" String ")")?
+}
+
+Effect { permit | forbid }
+
+Scope {
+  PrincipalConstraint "," ActionConstraint "," ResourceConstraint
+}
+
+PrincipalConstraint {
+  principal PrincipalConstraintBody?
+}
+
+PrincipalConstraintBody {
+  "==" PrincipalTarget |
+  in PrincipalTarget |
+  is EntityType PrincipalInConstraint?
+}
+
+PrincipalInConstraint { in PrincipalTarget }
+
+PrincipalTarget { EntityLiteral | PrincipalSlot }
+
+ActionConstraint {
+  action ActionConstraintBody?
+}
+
+ActionConstraintBody {
+  "==" EntityLiteral |
+  in (EntityLiteral | ActionEntitySet)
+}
+
+ActionEntitySet { "[" EntityList? "]" }
+
+EntityList { EntityLiteral ("," EntityLiteral)* ","? }
+
+ResourceConstraint {
+  resource ResourceConstraintBody?
+}
+
+ResourceConstraintBody {
+  "==" ResourceTarget |
+  in ResourceTarget |
+  is EntityType ResourceInConstraint?
+}
+
+ResourceInConstraint { in ResourceTarget }
+
+ResourceTarget { EntityLiteral | ResourceSlot }
+
+Condition {
+  (when | unless) ConditionBlock
+}
+
+ConditionBlock { "{" Expr "}" }
+
+Expr {
+  IfExpression | OrExpression
+}
+
+IfExpression {
+  !ifExpression if Expr then Expr else Expr
+}
+
+OrExpression {
+  AndExpression (!orExpression OrOperator AndExpression)*
+}
+
+OrOperator { "||" }
+
+AndExpression {
+  RelationExpression (!andExpression AndOperator RelationExpression)*
+}
+
+AndOperator { "&&" }
+
+RelationExpression {
+  AddExpression RelationTail?
+}
+
+RelationTail {
+  !relationExpression CompareOperator AddExpression |
+  !relationExpression has PropertyPath |
+  !relationExpression like PatternString |
+  !relationExpression is EntityType (in AddExpression)?
+}
+
+CompareOperator { "==" | "!=" | "<" | "<=" | ">" | ">=" | in }
+
+AddExpression {
+  MultiplyExpression (!addExpression AddOperator MultiplyExpression)*
+}
+
+AddOperator { "+" | "-" }
+
+MultiplyExpression {
+  UnaryExpression (!multiplyExpression MultiplyOperator UnaryExpression)*
+}
+
+MultiplyOperator { "*" }
+
+UnaryExpression {
+  (!unaryExpression UnaryOperator)?
+  (!unaryExpression UnaryOperator)?
+  (!unaryExpression UnaryOperator)?
+  (!unaryExpression UnaryOperator)?
+  MemberExpression
+}
+
+UnaryOperator { "!" | "-" }
+
+MemberExpression {
+  PrimaryExpression (!postfixExpression Access)*
+}
+
+Access {
+  MemberAccess | IndexAccess
+}
+
+MemberAccess {
+  "." MemberProperty CallArguments?
+}
+
+MemberProperty { Identifier }
+
+IndexAccess {
+  "[" String "]"
+}
+
+PrimaryExpression {
+  Literal |
+  ReservedVariable |
+  EntityLiteral |
+  ExtensionCall |
+  ParenthesizedExpression |
+  SetExpression |
+  RecordExpression
+}
+
+ParenthesizedExpression { "(" Expr ")" }
+
+SetExpression { "[" ExprList? "]" }
+
+RecordExpression { "{" RecordEntries? "}" }
+
+ExtensionCall { Identifier ExtensionCallContinuation }
+
+ExtensionCallContinuation {
+  CallArguments |
+  "::" Identifier ExtensionCallContinuation
+}
+
+CallArguments { "(" ExprList? ")" }
+
+ExprList { Expr ("," Expr)* ","? }
+
+RecordEntries { RecordEntry ("," RecordEntry)* ","? }
+
+RecordEntry { RecordKey ":" Expr }
+
+RecordKey { Identifier | String }
+
+PropertyPath { PropertyName ("." PropertyName)* }
+
+PropertyName { Identifier | String }
+
+EntityLiteral { Identifier EntityLiteralContinuation }
+
+EntityLiteralContinuation {
+  "::" (String | Identifier EntityLiteralContinuation)
+}
+
+EntityType { Identifier ("::" Identifier)* }
+
+Literal { Boolean | Integer | String }
+
+Boolean { true | false }
+
+ReservedVariable { principal | action | resource | context }
+
+PrincipalSlot { "?principal" }
+
+ResourceSlot { "?resource" }
+
+@tokens {
+  AnnotationName { identifierStart identifierContinue* }
+  Identifier {
+    $[A-Za-z] identifierContinue* |
+    "_" (
+      $[0-9A-Za-z] identifierContinue* |
+      "_" (
+        $[0-9A-Z_abd-z] identifierContinue* |
+        "c" (
+          $[0-9A-Z_a-df-z] identifierContinue* |
+          "e" (
+            $[0-9A-Z_a-ce-z] identifierContinue* |
+            "d" (
+              $[0-9A-Z_b-z] identifierContinue* |
+              "a" (
+                $[0-9A-Z_a-qs-z] identifierContinue* |
+                "r" identifierContinue+
+              )?
+            )?
+          )?
+        )?
+      )?
+    )?
+  }
+
+  Integer { $[0-9]+ }
+
+  String { '"' (stringCharacter | stringEscape)* '"' }
+  PatternString { '"' (stringCharacter | stringEscape | "\\*")* '"' }
+
+  LineComment { "//" ![\n\r]* }
+  whitespace { $[ \t\n\r]+ }
+
+  "@" "(" ")" "{" "}" "[" "]" "," ";" ":" "." "::"
+  "?principal" "?resource"
+  "==" "!=" "<" "<=" ">" ">=" "||" "&&" "!" "+" "-" "*"
+
+  identifierStart { $[A-Z_a-z] }
+  identifierContinue { $[0-9A-Z_a-z] }
+  hexDigit { $[0-9A-Fa-f] }
+  stringCharacter { !["\\\n\r] }
+  stringEscape {
+    "\\" ($["\\nrt0] | "x" $[0-7] hexDigit |
+      "u{" hexDigit hexDigit? hexDigit? hexDigit? hexDigit? hexDigit? "}")
+  }
+}
