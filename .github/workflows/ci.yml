@@ -18,4 +18,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Verify committed dist/ is up to date
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::Committed dist/ is stale. Run 'npm run build' and commit dist/."
+            git --no-pager diff --stat -- dist
+            exit 1
+          fi
       - run: npm test
