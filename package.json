@@ -10,9 +10,9 @@
     "syntax-highlighting"
   ],
   "license": "MIT",
-  "repository": "github:ridi/codemirror-lang-cedar",
-  "homepage": "https://github.com/ridi/codemirror-lang-cedar#readme",
-  "bugs": "https://github.com/ridi/codemirror-lang-cedar/issues",
+  "repository": "github:ridi-oss/codemirror-lang-cedar",
+  "homepage": "https://github.com/ridi-oss/codemirror-lang-cedar#readme",
+  "bugs": "https://github.com/ridi-oss/codemirror-lang-cedar/issues",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

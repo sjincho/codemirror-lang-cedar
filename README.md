@@ -12,7 +12,7 @@ package executes on `npm install` (no supply-chain surface from lifecycle script
 Install it as a git dependency:
 
 ```sh
-npm install github:ridi/codemirror-lang-cedar
+npm install github:ridi-oss/codemirror-lang-cedar
 ```
 
 Or pin it in a consumer's `package.json`:
@@ -20,7 +20,7 @@ Or pin it in a consumer's `package.json`:
 ```json
 {
   "dependencies": {
-    "@ridi/codemirror-lang-cedar": "github:ridi/codemirror-lang-cedar"
+    "@ridi/codemirror-lang-cedar": "github:ridi-oss/codemirror-lang-cedar"
   }
 }
 ```
