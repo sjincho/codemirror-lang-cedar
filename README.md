@@ -1,4 +1,4 @@
-# @sjincho/codemirror-lang-cedar
+# @ridi/codemirror-lang-cedar
 
 CodeMirror 6 language support for the [Cedar](https://www.cedarpolicy.com/) policy language: a Lezer grammar with highlighting, plus **optional Cedar-powered linting** (syntax + schema validation with precise source ranges) and **schema-aware completion** — backed by Cedar's official WebAssembly SDK.
 
@@ -12,7 +12,7 @@ package executes on `npm install` (no supply-chain surface from lifecycle script
 Install it as a git dependency:
 
 ```sh
-npm install github:sjincho/codemirror-lang-cedar
+npm install github:ridi/codemirror-lang-cedar
 ```
 
 Or pin it in a consumer's `package.json`:
@@ -20,7 +20,7 @@ Or pin it in a consumer's `package.json`:
 ```json
 {
   "dependencies": {
-    "@sjincho/codemirror-lang-cedar": "github:sjincho/codemirror-lang-cedar"
+    "@ridi/codemirror-lang-cedar": "github:ridi/codemirror-lang-cedar"
   }
 }
 ```
@@ -48,7 +48,7 @@ Syntax highlighting does **not** require WASM. The optional `@cedar-policy/cedar
 import {EditorState} from "@codemirror/state"
 import {EditorView} from "@codemirror/view"
 import {syntaxHighlighting} from "@codemirror/language"
-import {cedar, cedarHighlightStyle} from "@sjincho/codemirror-lang-cedar"
+import {cedar, cedarHighlightStyle} from "@ridi/codemirror-lang-cedar"
 
 const state = EditorState.create({
   doc: `permit(principal, action, resource);`,
@@ -77,7 +77,7 @@ import {
   cedarCompletion,
   cedarHighlightStyle,
   cedarLinter,
-} from "@sjincho/codemirror-lang-cedar"
+} from "@ridi/codemirror-lang-cedar"
 
 const schema: Schema = `
 namespace Demo {

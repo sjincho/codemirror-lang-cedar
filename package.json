@@ -1,5 +1,5 @@
 {
-  "name": "@sjincho/codemirror-lang-cedar",
+  "name": "@ridi/codemirror-lang-cedar",
   "version": "0.1.0",
   "description": "Cedar policy language support for CodeMirror 6",
   "keywords": [
@@ -10,9 +10,9 @@
     "syntax-highlighting"
   ],
   "license": "MIT",
-  "repository": "github:sjincho/codemirror-lang-cedar",
-  "homepage": "https://github.com/sjincho/codemirror-lang-cedar#readme",
-  "bugs": "https://github.com/sjincho/codemirror-lang-cedar/issues",
+  "repository": "github:ridi/codemirror-lang-cedar",
+  "homepage": "https://github.com/ridi/codemirror-lang-cedar#readme",
+  "bugs": "https://github.com/ridi/codemirror-lang-cedar/issues",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
